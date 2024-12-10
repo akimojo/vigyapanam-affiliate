@@ -1,9 +1,12 @@
 /* Admin Dashboard Styles */
 .vigyapanam-admin-dashboard {
     padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .admin-info-section,
+.signup-stats-section,
 .client-management-section,
 .performance-tracking-section,
 .freelancer-management-section {
@@ -40,72 +43,78 @@
     color: #333;
 }
 
-.client-form,
-.tracking-form,
-.ban-form {
-    display: grid;
-    gap: 15px;
-    max-width: 600px;
+/* Signup Stats Section */
+.signup-stats-section {
+    margin-bottom: 30px;
+}
+
+.recent-signups {
     margin: 20px 0;
 }
 
-.client-form input,
-.client-form textarea,
-.tracking-form input,
-.ban-form select,
-.ban-form textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.signup-chart {
+    margin: 20px 0;
+    height: 250px; /* Reduced height */
+    position: relative;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
 }
 
-.client-form button,
-.tracking-form button,
-.ban-form button {
-    background: #0073aa;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
+#signup-trend-chart {
+    max-height: 220px !important; /* Reduced maximum height */
 }
 
-.client-form button:hover,
-.tracking-form button:hover,
-.ban-form button:hover {
-    background: #005177;
-}
-
-.top-freelancers table {
-    width: 100%;
+/* Tables */
+.wp-list-table {
     border-collapse: collapse;
+    width: 100%;
     margin-top: 15px;
+    background: #fff;
 }
 
-.top-freelancers th,
-.top-freelancers td {
+.wp-list-table th,
+.wp-list-table td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
 
-.top-freelancers th {
+.wp-list-table th {
     background: #f8f9fa;
     font-weight: 600;
+    color: #333;
 }
 
-.button.edit-client,
-.button.delete-client {
-    margin: 0 5px;
+.wp-list-table tr:hover {
+    background: #f8f9fa;
 }
 
-.button.delete-client {
-    color: #dc3545;
-    border-color: #dc3545;
+/* Section Headers */
+.admin-info-section h2,
+.signup-stats-section h2,
+.client-management-section h2,
+.performance-tracking-section h2,
+.freelancer-management-section h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
 }
 
-.button.delete-client:hover {
-    background: #dc3545;
-    color: #fff;
+/* Responsive Design */
+@media (max-width: 782px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .signup-chart {
+        height: 200px;
+    }
+
+    #signup-trend-chart {
+        max-height: 170px !important;
+    }
 }

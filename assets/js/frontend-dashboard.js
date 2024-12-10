@@ -1,132 +1,113 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize charts
-    initializeCharts();
+    // Initialize charts if they exist
+    const revenueChart = document.getElementById('revenue-chart');
+    const trafficChart = document.getElementById('traffic-chart');
+    const locationChart = document.getElementById('location-chart');
+
+    if (revenueChart) initializeRevenueChart(revenueChart);
+    if (trafficChart) initializeTrafficChart(trafficChart);
+    if (locationChart) initializeLocationChart(locationChart);
     
     // Handle withdrawal form submission
-    const withdrawalForm = document.querySelector('#withdrawal-form');
+    const withdrawalForm = document.getElementById('withdrawal-form');
     if (withdrawalForm) {
         withdrawalForm.addEventListener('submit', handleWithdrawalSubmit);
     }
 });
 
-function initializeCharts() {
-    // Revenue chart
-    const revenueCtx = document.getElementById('revenue-chart');
-    if (revenueCtx) {
-        new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-                labels: getLastThirtyDays(),
-                datasets: [{
-                    label: 'Revenue',
-                    data: [], // Data will be populated via AJAX
-                    borderColor: '#0073aa',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
+function initializeRevenueChart(canvas) {
+    new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Revenue',
+                data: [],
+                borderColor: '#0073aa',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value;
+                        }
                     }
                 }
-            }
-        });
-    }
-    
-    // Traffic chart
-    const trafficCtx = document.getElementById('traffic-chart');
-    if (trafficCtx) {
-        new Chart(trafficCtx, {
-            type: 'bar',
-            data: {
-                labels: getLastThirtyDays(),
-                datasets: [{
-                    label: 'Traffic',
-                    data: [], // Data will be populated via AJAX
-                    backgroundColor: '#0073aa'
-                }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
                 }
             }
-        });
-    }
-    
-    // RPM chart
-    const rpmCtx = document.getElementById('rpm-chart');
-    if (rpmCtx) {
-        new Chart(rpmCtx, {
-            type: 'line',
-            data: {
-                labels: getLastThirtyDays(),
-                datasets: [{
-                    label: 'RPM',
-                    data: [], // Data will be populated via AJAX
-                    borderColor: '#28a745',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-}
-
-function getLastThirtyDays() {
-    const dates = [];
-    for (let i = 29; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        dates.push(date.toLocaleDateString());
-    }
-    return dates;
-}
-
-async function handleWithdrawalSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    
-    try {
-        const response = await fetch(ajaxurl, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const data = await response.json();
-        if (data.success) {
-            alert('Withdrawal request submitted successfully!');
-            location.reload();
-        } else {
-            alert(data.data.message || 'Error submitting withdrawal request');
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error submitting withdrawal request');
-    }
+    });
 }
 
-// Load chart data
+function initializeTrafficChart(canvas) {
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Traffic',
+                data: [],
+                backgroundColor: '#0073aa'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initializeLocationChart(canvas) {
+    new Chart(canvas, {
+        type: 'pie',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+}
+
 async function loadChartData() {
     try {
-        const response = await fetch(`${ajaxurl}?action=get_chart_data`);
+        const response = await fetch(vigyapanamAjax.ajaxurl + '?action=get_chart_data&nonce=' + vigyapanamAjax.nonce);
         if (!response.ok) throw new Error('Network response was not ok');
         
         const data = await response.json();
@@ -139,27 +120,66 @@ async function loadChartData() {
 }
 
 function updateCharts(data) {
-    const charts = {
-        revenue: Chart.getChart('revenue-chart'),
-        traffic: Chart.getChart('traffic-chart'),
-        rpm: Chart.getChart('rpm-chart')
-    };
-    
-    if (charts.revenue) {
-        charts.revenue.data.datasets[0].data = data.revenue;
-        charts.revenue.update();
+    // Update Revenue Chart
+    const revenueChart = Chart.getChart('revenue-chart');
+    if (revenueChart && data.revenue) {
+        revenueChart.data.labels = data.revenue.labels;
+        revenueChart.data.datasets[0].data = data.revenue.data;
+        revenueChart.update();
     }
-    
-    if (charts.traffic) {
-        charts.traffic.data.datasets[0].data = data.traffic;
-        charts.traffic.update();
+
+    // Update Traffic Chart
+    const trafficChart = Chart.getChart('traffic-chart');
+    if (trafficChart && data.traffic) {
+        trafficChart.data.labels = data.traffic.labels;
+        trafficChart.data.datasets[0].data = data.traffic.data;
+        trafficChart.update();
     }
-    
-    if (charts.rpm) {
-        charts.rpm.data.datasets[0].data = data.rpm;
-        charts.rpm.update();
+
+    // Update Location Chart
+    const locationChart = Chart.getChart('location-chart');
+    if (locationChart && data.locations) {
+        locationChart.data.labels = data.locations.labels;
+        locationChart.data.datasets[0].data = data.locations.data;
+        locationChart.update();
+    }
+}
+
+async function handleWithdrawalSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    try {
+        const formData = new FormData(form);
+        formData.append('action', 'request_withdrawal');
+        formData.append('nonce', vigyapanamAjax.nonce);
+
+        const response = await fetch(vigyapanamAjax.ajaxurl, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        if (data.success) {
+            alert('Withdrawal request submitted successfully!');
+            form.reset();
+        } else {
+            alert(data.data.message || 'Error submitting withdrawal request');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error submitting withdrawal request');
+    } finally {
+        submitButton.disabled = false;
     }
 }
 
 // Load initial chart data
 loadChartData();
+
+// Refresh chart data every 5 minutes
+setInterval(loadChartData, 300000);
